@@ -1,0 +1,35 @@
+{
+  "_README": "MOCK catalog for the prototype. In production a need-state maps to an editorially-maintained candidate pool per market, which is then filtered and ranked by Spotify's existing personalization stack (PRD §6, 'Retrieval'). Titles below are illustrative and fictional to avoid implying real catalog rights. 'tags' drive exclusion rules (e.g. 'romantic' is removed when the user says 'nothing romantic'). 'languages' lets us prefer audio in the user's language.",
+  "items": [
+    { "id": "d1", "title": "The Vanishing at Pier 9", "creator": "Nordlys True Crime", "format": "podcast", "needStates": ["distract"], "languages": ["en", "sv"], "tags": ["serialized", "gripping", "true-crime"] },
+    { "id": "d2", "title": "Heist: Season 1", "creator": "Cold Open Studios", "format": "audiobook", "needStates": ["distract"], "languages": ["en"], "tags": ["page-turner", "thriller"] },
+    { "id": "d3", "title": "Synth Horizons (Unfamiliar Mix)", "creator": "Various Artists", "format": "music", "needStates": ["distract", "energize"], "languages": ["instrumental"], "tags": ["upbeat", "discovery"] },
+    { "id": "d4", "title": "El Caso del Faro", "creator": "Pódcast Misterio", "format": "podcast", "needStates": ["distract"], "languages": ["es"], "tags": ["serialized", "gripping", "true-crime"] },
+    { "id": "d5", "title": "Der letzte Zug", "creator": "Hörspiel Kollektiv", "format": "audiobook", "needStates": ["distract"], "languages": ["de"], "tags": ["thriller", "page-turner"] },
+
+    { "id": "v1", "title": "Let It Out", "creator": "Various Artists", "format": "music", "needStates": ["validate"], "languages": ["en"], "tags": ["cathartic", "sad", "grief_safe"] },
+    { "id": "v2", "title": "Songs for the Quiet Hours", "creator": "Various Artists", "format": "music", "needStates": ["validate", "calm"], "languages": ["en"], "tags": ["melancholy", "grief_safe"] },
+    { "id": "v3", "title": "Corazón Roto (sin canciones de amor)", "creator": "Various Artists", "format": "music", "needStates": ["validate"], "languages": ["es"], "tags": ["cathartic", "sad", "grief_safe"] },
+    { "id": "v4", "title": "Slow Tears, Slow Beats", "creator": "Various Artists", "format": "music", "needStates": ["validate"], "languages": ["en"], "tags": ["melancholy", "lofi"] },
+    { "id": "v5", "title": "Trauriger Sonntag", "creator": "Various Artists", "format": "music", "needStates": ["validate"], "languages": ["de"], "tags": ["sad", "grief_safe"] },
+
+    { "id": "c1", "title": "Breathe: 4-7-8", "creator": "Calm Sessions", "format": "podcast", "needStates": ["calm"], "languages": ["en"], "tags": ["breathing", "guided"] },
+    { "id": "c2", "title": "Ambient Rain for Focus", "creator": "Various Artists", "format": "music", "needStates": ["calm"], "languages": ["instrumental"], "tags": ["ambient", "low-tempo", "sleep_safe"] },
+    { "id": "c3", "title": "Low Tempo Evenings", "creator": "Various Artists", "format": "music", "needStates": ["calm"], "languages": ["instrumental"], "tags": ["ambient", "low-tempo"] },
+    { "id": "c4", "title": "Respira (meditación guiada)", "creator": "Calma Diaria", "format": "podcast", "needStates": ["calm"], "languages": ["es"], "tags": ["guided", "breathing"] },
+    { "id": "c5", "title": "Ruhig Atmen", "creator": "Achtsam", "format": "podcast", "needStates": ["calm"], "languages": ["de"], "tags": ["guided", "breathing"] },
+
+    { "id": "e1", "title": "Favorites on Full Volume", "creator": "Various Artists", "format": "music", "needStates": ["energize"], "languages": ["en"], "tags": ["upbeat", "familiar", "hype"] },
+    { "id": "e2", "title": "Morning Sprint", "creator": "Various Artists", "format": "music", "needStates": ["energize"], "languages": ["instrumental"], "tags": ["workout", "upbeat"] },
+    { "id": "e3", "title": "Subidón", "creator": "Various Artists", "format": "music", "needStates": ["energize"], "languages": ["es"], "tags": ["hype", "upbeat", "familiar"] },
+    { "id": "e4", "title": "Volle Energie", "creator": "Various Artists", "format": "music", "needStates": ["energize"], "languages": ["de"], "tags": ["hype", "workout"] },
+
+    { "id": "m1", "title": "Late Night Company", "creator": "The Long Table", "format": "podcast", "needStates": ["company"], "languages": ["en"], "tags": ["warm", "conversational"] },
+    { "id": "m2", "title": "Two Friends Talking", "creator": "Kitchen Table Media", "format": "podcast", "needStates": ["company"], "languages": ["en"], "tags": ["warm", "conversational", "cozy"] },
+    { "id": "m3", "title": "Sobremesa", "creator": "Charla Lenta", "format": "podcast", "needStates": ["company"], "languages": ["es"], "tags": ["warm", "conversational"] },
+    { "id": "m4", "title": "Am Küchentisch", "creator": "Nachtfunk", "format": "podcast", "needStates": ["company"], "languages": ["de"], "tags": ["warm", "conversational", "cozy"] },
+
+    { "id": "x1", "title": "Slow Dance Forever", "creator": "Various Artists", "format": "music", "needStates": ["validate", "calm"], "languages": ["en"], "tags": ["romantic", "slow"] },
+    { "id": "x2", "title": "Canciones de Amor", "creator": "Various Artists", "format": "music", "needStates": ["validate"], "languages": ["es"], "tags": ["romantic"] }
+  ]
+}

@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Secrets — never commit real keys
+.env
+.env.local
+
+# Eval runs that hit a paid API (the offline baseline IS committed; LLM runs are not)
+eval/results-llm.json
+
+# OS / editor cruft
+.DS_Store
+*.log
+npm-debug.log*
+.vscode/
+.idea/

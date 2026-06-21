@@ -1,0 +1,23 @@
+{
+  "name": "spotify-mood-check-in",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Working prototype of the 'Mood Check-In for Spotify AI DJ' feature — a consent-first, EU-first emotion-aware recommendation layer. Portfolio case study by Upasana Sen.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "eval": "node eval/run-eval.js --mode=baseline",
+    "eval:llm": "node eval/run-eval.js --mode=llm"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.32.1",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2"
+  },
+  "license": "MIT",
+  "author": "Upasana Sen"
+}

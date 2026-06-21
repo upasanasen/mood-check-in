@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mood Check-In · AI DJ (prototype)</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="app">
+    <!-- Persistent AI disclosure (PRD P0-6, EU AI Act transparency) -->
+    <div class="disclosure" id="disclosure">
+      <span class="dot"></span>
+      <span id="disclosureText">You're talking to an AI DJ, not a person.</span>
+      <button class="link" id="openSettings" aria-label="Privacy settings">Privacy</button>
+    </div>
+
+    <header class="masthead">
+      <h1>Mood Check-In</h1>
+      <p class="sub">Tell the DJ how you're feeling — get the right audio for this moment.</p>
+      <p class="badge">Prototype · independent portfolio case study · not affiliated with Spotify</p>
+    </header>
+
+    <!-- 1. CONSENT GATE (first use) -->
+    <section class="card consent" id="consentCard" hidden>
+      <h2>Before we start</h2>
+      <p>How you feel is sensitive. This prototype treats your mood input as <strong>special-category data</strong> and only ever uses it to pick audio for you.</p>
+      <ul class="ticks">
+        <li>Explicit opt-in — nothing is inferred from your listening history.</li>
+        <li>Viewable and deletable any time, from Privacy.</li>
+        <li>Never used for ads. Ever.</li>
+        <li>Proposed retention in production: 90 days.</li>
+      </ul>
+      <label class="check">
+        <input type="checkbox" id="rememberOptIn" />
+        Also remember what helped, to make future check-ins faster (optional).
+      </label>
+      <div class="row">
+        <button class="primary" id="consentAccept">I understand — turn it on</button>
+        <button class="ghost" id="consentDecline">Not now</button>
+      </div>
+    </section>
+
+    <!-- 2. CHECK-IN -->
+    <section class="card" id="checkInCard" hidden>
+      <h2>How are you feeling?</h2>
+
+      <div class="chips" id="presetChips" aria-label="Quick moods"></div>
+
+      <label class="field-label" for="moodText">…or say it in your own words</label>
+      <div class="input-wrap">
+        <textarea id="moodText" rows="2" maxlength="1000"
+          placeholder="e.g. just got laid off, can't focus — or type in your language"></textarea>
+        <button class="icon" id="voiceBtn" title="Voice input (uses the DJ voice prompt in production)" aria-label="Voice input">🎙️</button>
+      </div>
+
+      <div class="opts">
+        <label class="field-label" for="excludeText">Anything to avoid?</label>
+        <input id="excludeText" type="text" placeholder="e.g. nothing romantic" />
+        <label class="field-label" for="langSel">Language</label>
+        <select id="langSel">
+          <option value="">Auto</option>
+          <option value="en">English</option>
+          <option value="es">Español</option>
+          <option value="de">Deutsch</option>
+        </select>
+      </div>
+
+      <button class="primary wide" id="submitBtn">Check in</button>
+      <p class="hint" id="checkinHint"></p>
+    </section>
+
+    <!-- 3. RESULT (recommendations / clarify / crisis injected here) -->
+    <section id="result" aria-live="polite"></section>
+
+    <!-- PRIVACY DRAWER -->
+    <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+    <aside class="drawer" id="settingsDrawer" hidden aria-label="Privacy settings">
+      <div class="drawer-head">
+        <h2>Privacy</h2>
+        <button class="icon" id="closeSettings" aria-label="Close">✕</button>
+      </div>
+      <p class="muted">Your mood data is yours. Manage it here.</p>
+      <div class="drawer-actions">
+        <button class="ghost" id="viewData">View my mood history</button>
+        <button class="ghost danger" id="deleteData">Delete my history</button>
+        <button class="ghost danger" id="disableFeature">Turn off Mood Check-In</button>
+      </div>
+      <pre class="data-view" id="dataView" hidden></pre>
+      <p class="fineprint">In production: special-category (GDPR Art. 9) consent, 90-day retention, excluded from ad targeting, DPIA before beta. (PRD P0-7)</p>
+    </aside>
+
+    <footer class="foot">
+      <span id="modeBadge" class="mode-badge">checking…</span>
+      <span>Need-states: Distract · Validate · Calm · Energize · Company — with an independent crisis guardrail.</span>
+    </footer>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

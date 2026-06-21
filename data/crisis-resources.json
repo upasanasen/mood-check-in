@@ -1,0 +1,31 @@
+{
+  "_README": "Crisis resources shown by the hard-tier guardrail. SAFETY-CRITICAL DATA. Per PRD §10 (Open Questions) the per-country helpline list and the on-screen copy are BLOCKING items that must be reviewed and signed off by a clinical advisor before any real launch. The entries below are intentionally minimal and conservative: only resources we can state with confidence are included. Country-specific lines are left for clinical review rather than guessed — do NOT populate them with unverified numbers.",
+  "_reviewStatus": "UNREVIEWED — placeholder for clinical sign-off (see PRD §10)",
+  "copy": {
+    "heading": "Before anything plays — you deserve real support",
+    "body": "It sounds like you're going through something really heavy right now. You don't have to carry it alone, and talking to a person can help more than a playlist can. Reaching out is a strong thing to do.",
+    "aiDisclosure": "You're talking to Spotify's AI DJ, not a person. The contacts below connect you to trained humans."
+  },
+  "universal": [
+    {
+      "label": "Emergency (EU)",
+      "value": "112",
+      "type": "phone",
+      "note": "Single emergency number across the EU. Use if you're in immediate danger.",
+      "confidence": "high"
+    },
+    {
+      "label": "Find a helpline in your country",
+      "value": "https://findahelpline.com",
+      "type": "url",
+      "note": "Free, confidential helplines by country, maintained by ThroughLine.",
+      "confidence": "high"
+    }
+  ],
+  "byCountry": {
+    "_note": "Populate after clinical review with verified, country-appropriate lines for each launch market (Sweden, Spain, Germany, ...). Left empty deliberately — unverified crisis numbers are worse than none.",
+    "SE": [],
+    "ES": [],
+    "DE": []
+  }
+}
