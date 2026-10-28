@@ -15,7 +15,11 @@ import express from "express";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 
-import { detectCrisis, getCrisisResources } from "./src/crisisDetector.js";
+import {
+  detectCrisis,
+  getCrisisResources,
+  keywordCrisisCheck,
+} from "./src/crisisDetector.js";
 import { classifyNeedState } from "./src/classifier.js";
 import { recommend } from "./src/recommender.js";
 import { CLARIFY } from "./src/needStates.js";
@@ -57,12 +61,26 @@ app.post("/api/check-in", async (req, res) => {
     // Crisis detection and need-state classification both run INDEPENDENTLY on
     // the raw input (run concurrently to respect the latency budget). If no
     // forced need-state, classify; otherwise skip the classify call.
-    const [crisis, classification] = await Promise.all([
+    // allSettled, not all: a thrown need-state classification must never
+    // discard a completed crisis assessment. Safety outranks the recommendation.
+    const [crisisSettled, classificationSettled] = await Promise.allSettled([
       detectCrisis(text),
-      forcedNeedState
-        ? Promise.resolve(null)
-        : classifyNeedState(text),
+      forcedNeedState ? Promise.resolve(null) : classifyNeedState(text),
     ]);
+
+    // detectCrisis absorbs its own layer-2 failures, but if it fails outright
+    // the user is still owed the deterministic layer-1 verdict.
+    const crisis =
+      crisisSettled.status === "fulfilled"
+        ? crisisSettled.value
+        : degradedCrisis(text, crisisSettled.reason);
+
+    const classification =
+      classificationSettled.status === "fulfilled" ? classificationSettled.value : null;
+    const classificationFailed = classificationSettled.status === "rejected";
+    if (classificationFailed) {
+      console.error("[check-in] classifier failed:", classificationSettled.reason?.message);
+    }
 
     // HARD crisis: resources only. No recommendation, ever.
     if (crisis.tier === "hard") {
@@ -70,15 +88,19 @@ app.post("/api/check-in", async (req, res) => {
       return res.json({
         type: "crisis",
         tier: "hard",
+        degraded: Boolean(crisis.degraded),
         aiDisclosure: AI_DISCLOSURE,
         ...getCrisisResources(country),
       });
     }
 
-    // Low-confidence (and not forced): ask ONE clarifying question.
-    if (!forcedNeedState && classification?.lowConfidence) {
+    // Low-confidence (and not forced): ask ONE clarifying question. A
+    // classifier that failed outright lands here too — asking is the designed
+    // behaviour for "no usable signal", and it beats erroring or guessing.
+    if (!forcedNeedState && (classificationFailed || classification?.lowConfidence)) {
       return res.json({
         type: "clarify",
+        degraded: classificationFailed,
         clarify: CLARIFY,
         crisis: { tier: crisis.tier },
         softResources: crisis.tier === "soft" ? getCrisisResources(country) : null,
@@ -102,11 +124,31 @@ app.post("/api/check-in", async (req, res) => {
       excludedTags,
       note,
       crisis: { tier: crisis.tier }, // 'none' or 'soft'
+      degraded: Boolean(crisis.degraded),
       softResources: crisis.tier === "soft" ? getCrisisResources(country) : null,
       aiDisclosure: AI_DISCLOSURE,
     });
   } catch (err) {
     console.error("[check-in] error:", err.message);
+
+    // Last-resort guard (PRD P0-3): whatever broke above, if the raw input
+    // trips the deterministic crisis net the user gets resources — never an
+    // error screen. This is the floor under every failure mode in this handler.
+    try {
+      const rawText = String(req.body?.text || "").trim();
+      if (rawText && keywordCrisisCheck(rawText).tier === "hard") {
+        return res.json({
+          type: "crisis",
+          tier: "hard",
+          degraded: true,
+          aiDisclosure: AI_DISCLOSURE,
+          ...getCrisisResources(req.body?.country || null),
+        });
+      }
+    } catch (guardErr) {
+      console.error("[check-in] crisis guard failed:", guardErr.message);
+    }
+
     // Never leak internals; surface a safe message + setup hint if it's the key.
     const hint = /ANTHROPIC_API_KEY/.test(err.message)
       ? " (Set ANTHROPIC_API_KEY in .env, or run with MOCK_LLM=1.)"
@@ -134,6 +176,27 @@ app.delete("/api/data", (req, res) => {
   if (sid) store.delete(sid);
   res.json({ ok: true, deleted: Boolean(sid) });
 });
+
+// Layer-1-only crisis verdict, for when detectCrisis itself fails. Flagged
+// degraded so a 'none' here is never mistaken for a verified all-clear.
+function degradedCrisis(text, reason) {
+  console.error("[check-in] crisis detector failed:", reason?.message || reason);
+  const kw = keywordCrisisCheck(text);
+  return {
+    tier: kw.tier,
+    confidence: 0,
+    rationale: "detector failed -> keyword net",
+    degraded: true,
+    layers: {
+      keyword: kw.tier,
+      llm: null,
+      keywordHardHits: kw.hardHits,
+      keywordSoftHits: kw.softHits,
+      modelParsed: false,
+      llmError: String(reason?.message || reason),
+    },
+  };
+}
 
 function appendStore(sessionId, entry) {
   const list = store.get(sessionId) || [];
