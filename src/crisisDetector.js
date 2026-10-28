@@ -93,28 +93,41 @@ Critical rules:
 export async function detectCrisis(text) {
   const kw = keywordCrisisCheck(text);
 
-  const raw = await complete({
-    system: SYSTEM,
-    user: text,
-    maxTokens: 80,
-    temperature: 0,
-    // MOCK_LLM stub: derive a tier from the keyword net so the app runs key-free.
-    mockFn: (u) => {
-      const k = keywordCrisisCheck(u);
-      return JSON.stringify({
-        tier: k.tier,
-        confidence: k.tier === "none" ? 0.5 : 0.8,
-        rationale: "keyword net (mock)",
-      });
-    },
-  });
+  // Layer 2 is called inside a try/catch. A THROWN call — missing key, rate
+  // limit, timeout, provider 5xx — must not take the whole assessment down
+  // with it. Without this guard the exception escaped detectCrisis, the
+  // /api/check-in handler answered with a generic error, and an explicit
+  // "kill myself" got an error screen and NO resources — even though layer 1
+  // had already flagged it HARD offline. A dead layer 2 is precisely when the
+  // deterministic backstop has to carry the assessment.
+  let raw = null;
+  let llmError = null;
+  try {
+    raw = await complete({
+      system: SYSTEM,
+      user: text,
+      maxTokens: 80,
+      temperature: 0,
+      // MOCK_LLM stub: derive a tier from the keyword net so the app runs key-free.
+      mockFn: (u) => {
+        const k = keywordCrisisCheck(u);
+        return JSON.stringify({
+          tier: k.tier,
+          confidence: k.tier === "none" ? 0.5 : 0.8,
+          rationale: "keyword net (mock)",
+        });
+      },
+    });
+  } catch (err) {
+    llmError = err?.message ? String(err.message) : String(err);
+  }
 
-  const parsed = parseJSONObject(raw);
+  const parsed = llmError ? null : parseJSONObject(raw);
   const llmTier =
     parsed && ["hard", "soft", "none"].includes(parsed.tier) ? parsed.tier : "none";
 
-  // Fail safe: if the model output was unparseable, do not silently drop to
-  // none — fall back to the keyword net's tier.
+  // Fail safe: if layer 2 errored OR returned unparseable output, do not
+  // silently drop to none — fall back to the keyword net's tier.
   const llmEffective = parsed ? llmTier : kw.tier;
 
   const finalTier = maxTier(kw.tier, llmEffective);
@@ -122,13 +135,23 @@ export async function detectCrisis(text) {
   return {
     tier: finalTier,
     confidence: parsed ? Number(parsed.confidence) || 0 : 0,
-    rationale: parsed ? String(parsed.rationale || "").slice(0, 120) : "unparseable -> keyword net",
+    rationale: llmError
+      ? "layer 2 unavailable -> keyword net"
+      : parsed
+      ? String(parsed.rationale || "").slice(0, 120)
+      : "unparseable -> keyword net",
+    // True when the verdict rests on layer 1 alone. A degraded "none" means
+    // "unverified", NOT "safe" — the indirect phrasings layer 1 cannot see are
+    // the ones the LLM layer exists to catch (eval/ERROR-ANALYSIS.md §2).
+    degraded: Boolean(llmError),
     layers: {
       keyword: kw.tier,
-      llm: llmEffective,
+      // null rather than kw.tier: a layer that never answered did not "agree".
+      llm: llmError ? null : llmEffective,
       keywordHardHits: kw.hardHits,
       keywordSoftHits: kw.softHits,
       modelParsed: Boolean(parsed),
+      llmError,
     },
   };
 }

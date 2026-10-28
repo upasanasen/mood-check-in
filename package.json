@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
+    "test": "node --test \"tests/**/*.test.js\"",
     "eval": "node eval/run-eval.js --mode=baseline",
     "eval:llm": "node eval/run-eval.js --mode=llm"
   },
